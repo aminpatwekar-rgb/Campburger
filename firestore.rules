@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global helper primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        (request.auth.token.email == 'aminpatwekar@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    // 1. Global Default Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Real-time Customer Orders
+    match /orders/{orderId} {
+      // Customers can ONLY read their own orders; Admins can read all orders
+      allow read: if isSignedIn() && (
+        resource.data.userUid == request.auth.uid ||
+        isAdmin()
+      );
+
+      // Writes are strictly server-authoritative via Firebase Admin SDK
+      // Client-side direct tampering, forging, or deletion is completely blocked
+      allow write: if false;
+    }
+  }
+}

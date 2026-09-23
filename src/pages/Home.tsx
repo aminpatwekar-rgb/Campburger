@@ -3,25 +3,36 @@ import { Link } from 'react-router-dom';
 import { fetchMenu } from '../api';
 import { MenuItem } from '../types';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
 import { useToast } from '../context/ToastContext';
 import { Flame, Star, Zap, MapPin } from 'lucide-react';
 
 export default function Home() {
   const [popularItems, setPopularItems] = useState<MenuItem[]>([]);
+  const [pickedItems, setPickedItems] = useState<MenuItem[]>([]);
   const { addToCart } = useCart();
+  const { dbUser } = useAuth();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMenu().then(data => {
       setPopularItems(data.slice(0, 3));
+      
+      if (dbUser?.favoriteCategory) {
+        const matching = data.filter(item => item.category.toLowerCase() === dbUser.favoriteCategory.toLowerCase());
+        setPickedItems(matching.slice(0, 3));
+      } else {
+        setPickedItems([]);
+      }
+      
       setLoading(false);
     }).catch(err => {
       console.error(err);
       setLoading(false);
     });
-  }, []);
+  }, [dbUser?.favoriteCategory]);
 
   return (
     <motion.div 
@@ -85,8 +96,78 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Picked for You */}
+      {dbUser?.favoriteCategory && pickedItems.length > 0 && !loading && (
+        <section className="pt-20 pb-4 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-10">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <h2 className="text-2xl md:text-3xl font-extrabold text-[#111111] tracking-tight">
+                  PICKED FOR YOU: <span className="text-[#F4511E] uppercase">{dbUser.favoriteCategory}</span>
+                </h2>
+                <p className="text-gray-500 mt-2 font-medium">Because you told us what you're craving.</p>
+              </motion.div>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {pickedItems.map((item, i) => (
+                <motion.div 
+                  key={item.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -8 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 flex flex-col group transition-shadow duration-300 relative"
+                >
+                  <div className="absolute top-4 left-4 z-10 bg-[#F4511E] text-white text-[10px] font-bold px-2 py-1 rounded shadow-md border border-[#F4511E]">
+                    TOP PICK
+                  </div>
+                  <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden">
+                    <motion.img 
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      src={item.imageUrl} 
+                      alt={item.name} 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-bold text-[#111111] group-hover:text-[#F4511E] transition-colors mb-2">{item.name}</h3>
+                    <p className="text-gray-500 text-sm mb-6 flex-grow line-clamp-2 leading-relaxed">{item.description}</p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-2xl font-extrabold text-[#111111]">₹{item.price}</span>
+                      <motion.button 
+                        whileTap={item.isAvailable ? { scale: 0.95 } : {}}
+                        onClick={() => {
+                          addToCart(item);
+                          showToast(`${item.name} added to cart`);
+                        }}
+                        disabled={!item.isAvailable}
+                        className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
+                          item.isAvailable 
+                            ? "bg-[#111111] hover:bg-[#F4511E] text-white shadow-md group-hover:shadow-lg" 
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        + ADD
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Popular Items */}
-      <section className="py-20 px-6">
+      <section className={`${dbUser?.favoriteCategory && pickedItems.length > 0 ? 'pt-10' : 'py-20'} pb-20 px-6`}>
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
             <motion.div 

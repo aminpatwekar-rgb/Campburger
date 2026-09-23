@@ -6,6 +6,7 @@ export const users = pgTable('users', {
   uid: text('uid').notNull().unique(),
   email: text('email').notNull(),
   role: text('role').default('customer').notNull(),
+  favoriteCategory: text('favorite_category'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -38,6 +39,7 @@ export const orders = pgTable('orders', {
   deliveryAddress: text('delivery_address'),
   deliveryLandmark: text('delivery_landmark'),
   deliveryInstructions: text('delivery_instructions'),
+  paymentProofUrl: text('payment_proof_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchOrder } from '../api';
+import { fetchOrder, uploadPaymentProof, submitOrderPaymentProof } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, QrCode, Upload, Loader2, Check, ShieldCheck, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function OrderConfirmation() {
@@ -11,6 +11,8 @@ export default function OrderConfirmation() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadedSuccess, setUploadedSuccess] = useState(false);
 
   useEffect(() => {
     if (idToken && id) {
@@ -23,6 +25,24 @@ export default function OrderConfirmation() {
       });
     }
   }, [id, idToken]);
+
+  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !idToken || !order) return;
+
+    setUploading(true);
+    try {
+      const uploadRes = await uploadPaymentProof(file, idToken);
+      const updated = await submitOrderPaymentProof(order.id, { paymentProofUrl: uploadRes.url }, idToken);
+      setOrder(updated);
+      setUploadedSuccess(true);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to upload receipt');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-[70vh] flex items-center justify-center bg-[#FFF8F0]">Loading...</div>;
@@ -98,9 +118,72 @@ export default function OrderConfirmation() {
           </div>
           
           <div className="border-t border-gray-100 pt-4 flex justify-between items-center font-bold">
-            <span>Total Paid (COD)</span>
-            <span className="text-xl text-[#F4511E]">₹{order.total}</span>
+            <div>
+              <span className="block text-gray-800">
+                Total ({order.paymentMethod === 'UPI' ? 'UPI QR' : 'Cash on Delivery'})
+              </span>
+              <span className="text-xs font-normal text-gray-500">
+                Payment: {order.paymentStatus}
+              </span>
+            </div>
+            <span className="text-2xl font-black text-[#F4511E]">₹{order.total}</span>
           </div>
+
+          {/* UPI Confirmation / Receipt Attachment Box */}
+          {order.paymentMethod === 'UPI' && (
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <QrCode size={18} className="text-indigo-600" />
+                    <span className="text-xs font-extrabold text-indigo-950">Store UPI Verification</span>
+                  </div>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                    order.paymentStatus?.includes('Paid') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {order.paymentStatus}
+                  </span>
+                </div>
+
+                {order.paymentProofUrl ? (
+                  <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-indigo-100 mt-2">
+                    <img 
+                      src={order.paymentProofUrl} 
+                      alt="Uploaded Receipt" 
+                      className="w-12 h-12 rounded-lg object-cover border border-gray-200" 
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">Payment receipt received</p>
+                      <p className="text-[11px] text-gray-500">Our kitchen verifies this against our UPI notifications.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <label className="flex items-center justify-center gap-2 p-2.5 bg-white border border-dashed border-indigo-300 hover:border-indigo-500 rounded-xl cursor-pointer text-xs font-bold text-indigo-700 transition-all">
+                      {uploading ? (
+                        <>
+                          <Loader2 className="animate-spin text-indigo-600" size={14} />
+                          <span>Uploading receipt...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={14} className="text-indigo-600" />
+                          <span>Upload Payment Screenshot (GPay / PhonePe / Paytm)</span>
+                        </>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleProofUpload} 
+                        disabled={uploading} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </motion.div>
         
         <motion.div 

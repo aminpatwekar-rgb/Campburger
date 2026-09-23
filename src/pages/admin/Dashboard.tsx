@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAdminStats, fetchAdminOrders } from '../../api';
 import { useAuth } from '../../context/AuthContext';
-import { TrendingUp, ShoppingBag, Clock, CheckCircle, PackageOpen, Plus, List, Users } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Clock, CheckCircle, PackageOpen, Plus, List, Users, QrCode } from 'lucide-react';
 import { motion, useSpring, useTransform } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Order, DashboardStats } from '../../types';
+import PaymentSettingsModal from '../../components/admin/PaymentSettingsModal';
 
 function AnimatedNumber({ value, prefix = "" }: { value: number, prefix?: string }) {
   const spring = useSpring(0, { bounce: 0, duration: 1000 });
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const { idToken } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (idToken) {
@@ -53,7 +55,14 @@ export default function Dashboard() {
           <h1 className="text-3xl font-extrabold text-[#111111] tracking-tight">Dashboard Overview</h1>
           <p className="text-gray-500 font-medium">{currentDate}</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3">
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="bg-white hover:bg-gray-50 text-[#111111] border border-gray-200 px-5 py-2.5 rounded-full font-bold flex items-center gap-2 transition-all shadow-sm"
+          >
+            <QrCode size={18} className="text-[#F4511E]" />
+            <span className="text-sm">Store QR / UPI</span>
+          </button>
           <Link to="/admin/menu" className="bg-[#111111] hover:bg-gray-800 text-white px-5 py-2.5 rounded-full font-bold flex items-center gap-2 transition-all shadow-md">
             <Plus size={18} />
             <span className="text-sm">Add Menu Item</span>
@@ -146,6 +155,11 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      <PaymentSettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </motion.div>
   );
 }

@@ -12,10 +12,12 @@ interface Toast {
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
+  addToast: (message: string, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextType>({
   showToast: () => {},
+  addToast: () => {},
 });
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -35,7 +37,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, addToast: showToast }}>
       {children}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
         <AnimatePresence mode="popLayout">

@@ -28,6 +28,13 @@ export default function Navbar() {
             <Link to="/menu" className="font-bold text-sm tracking-wide text-gray-300 hover:text-white transition-colors">MENU</Link>
             <Link to="/#location" className="font-bold text-sm tracking-wide text-gray-300 hover:text-white transition-colors">LOCATION</Link>
             
+            {user && (
+              <Link to="/orders" className="font-bold text-sm tracking-wide text-gray-300 hover:text-white transition-colors flex items-center gap-1.5">
+                <span>MY ORDERS</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </Link>
+            )}
+
             {role === 'admin' && (
               <Link to="/admin" className="font-bold text-sm tracking-wide text-[#F4511E] hover:text-white transition-colors flex items-center gap-1.5">
                 <Shield size={16} />
@@ -123,6 +130,13 @@ export default function Navbar() {
                 <>
                   <Link to="/menu" onClick={() => setIsMobileMenuOpen(false)} className="text-white hover:text-[#F4511E] transition-colors">MENU</Link>
                   <Link to="/#location" onClick={() => setIsMobileMenuOpen(false)} className="text-white hover:text-[#F4511E] transition-colors">LOCATION</Link>
+                  
+                  {user && (
+                    <Link to="/orders" onClick={() => setIsMobileMenuOpen(false)} className="text-white hover:text-[#F4511E] transition-colors flex items-center justify-between">
+                      <span>MY ORDERS</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </Link>
+                  )}
                   
                   {role === 'admin' && (
                     <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="text-[#F4511E] hover:text-white transition-colors flex items-center gap-2">

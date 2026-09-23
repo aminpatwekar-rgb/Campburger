@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Customer food order with real-time status updates",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Numeric internal order ID matching PostgreSQL record"
+        },
+        "orderNumber": {
+          "type": "string",
+          "description": "User visible order reference (e.g. #CB1043)"
+        },
+        "userId": {
+          "type": "number",
+          "description": "PostgreSQL user record ID"
+        },
+        "userUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of customer"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Recipient full name"
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Customer contact number"
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "description": "Street delivery address"
+        },
+        "deliveryLandmark": {
+          "type": "string",
+          "description": "Nearby landmark or directions"
+        },
+        "deliveryInstructions": {
+          "type": "string",
+          "description": "Special delivery instructions"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Received", "Confirmed", "Preparing", "Ready", "Out for Delivery", "Delivered", "Cancelled"],
+          "description": "Current order lifecycle status"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Payment method (COD, Online, etc.)"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Pending or Paid"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Food subtotal amount in INR"
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "Delivery charge in INR"
+        },
+        "total": {
+          "type": "number",
+          "description": "Grand total in INR"
+        },
+        "items": {
+          "type": "array",
+          "description": "List of food items included in the order"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when order was placed"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of most recent status update"
+        }
+      },
+      "required": ["id", "orderNumber", "userUid", "status", "total"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/Order"
+      },
+      "description": "Real-time order tracking collection"
+    }
+  }
+}

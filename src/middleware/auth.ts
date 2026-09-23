@@ -26,7 +26,8 @@ export const requireAuth = async (
     const decodedToken = await adminAuth.verifyIdToken(token);
     req.user = decodedToken;
     
-    const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+    const envAdmins = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+    const ADMIN_EMAILS = [...envAdmins, 'aminpatwekar@gmail.com'];
     const userEmail = decodedToken.email || '';
     const computedRole = ADMIN_EMAILS.includes(userEmail) ? 'admin' : 'customer';
 

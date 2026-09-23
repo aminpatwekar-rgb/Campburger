@@ -35,6 +35,8 @@
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.25.0",
+    "jpeg-js": "^0.4.4",
+    "jsqr": "^1.4.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",

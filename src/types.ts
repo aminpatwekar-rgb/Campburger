@@ -40,6 +40,7 @@ export interface Order {
   deliveryAddress: string;
   deliveryLandmark: string;
   deliveryInstructions: string;
+  paymentProofUrl?: string;
   createdAt: string;
   updatedAt: string;
   items?: OrderItem[];
@@ -58,4 +59,12 @@ export interface OrderItem {
   quantity: number;
   price: number;
   menuItem: Partial<MenuItem>;
+}
+
+export interface PaymentSettings {
+  upiId: string;
+  payeeName: string;
+  qrImageUrl: string;
+  isEnabled: boolean;
+  instructions: string;
 }

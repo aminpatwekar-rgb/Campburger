@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import MobileCartBar from './components/MobileCartBar';
+import OnboardingModal from './components/OnboardingModal';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import Cart from './pages/Cart';
@@ -37,6 +38,7 @@ function AppRoutes() {
   return (
     <div className="min-h-screen bg-[#FFF8F0] text-[#111111] font-sans flex flex-col">
       <Navbar />
+      <OnboardingModal />
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -45,6 +47,8 @@ function AppRoutes() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/track/:id" element={<OrderTracking />} />
+          <Route path="/track" element={<OrderTracking />} />
+          <Route path="/orders" element={<OrderTracking />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoute><Dashboard /></AdminRoute>} />
@@ -98,14 +102,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
+    <ToastProvider>
+      <AuthProvider>
         <CartProvider>
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
         </CartProvider>
-      </ToastProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
